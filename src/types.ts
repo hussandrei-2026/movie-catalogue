@@ -15,6 +15,15 @@ export interface CollectionItem {
   notes: string;
   location: string; // e.g. "Living room shelf 2"
   addedAt: string; // ISO datetime
+  // Plex integration
+  plexAvailable?: boolean;
+  plexLibraryName?: string | null;
+}
+
+export interface PlexConfig {
+  serverUrl: string;       // e.g. "http://192.168.1.100:32400"
+  token: string;           // X-Plex-Token
+  lastSyncAt: string | null;
 }
 
 export interface TMDBSearchResult {
@@ -68,6 +77,7 @@ export type CollectionFilter =
   | 'tv'
   | 'watched'
   | 'unwatched'
-  | 'wishlist';
+  | 'wishlist'
+  | 'inPlex';
 
-export type AppView = 'collection' | 'search';
+export type AppView = 'collection' | 'search' | 'settings';

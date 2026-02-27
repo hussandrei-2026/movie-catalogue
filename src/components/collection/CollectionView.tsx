@@ -18,6 +18,7 @@ function applyFilter(items: CollectionItem[], filter: CollectionFilter): Collect
     case 'watched': return items.filter(i => i.watched);
     case 'unwatched': return items.filter(i => !i.watched);
     case 'wishlist': return items.filter(i => i.wishlist);
+    case 'inPlex': return items.filter(i => i.plexAvailable === true);
   }
 }
 
