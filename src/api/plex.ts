@@ -9,7 +9,8 @@ interface PlexMetadataItem {
   ratingKey: string;
   title: string;
   year?: number;
-  Guid?: PlexGuid[];
+  guid?: string;   // legacy agent: "com.plexapp.agents.themoviedb://27205?lang=en"
+  Guid?: PlexGuid[]; // modern agent: [{ id: "tmdb://27205" }, ...]
 }
 
 interface PlexSection {
@@ -97,7 +98,26 @@ export async function fetchSectionItems(
   return data.MediaContainer.Metadata ?? [];
 }
 
-// Returns Map<tmdbId, libraryName> for all Plex items with a TMDB guid
+// Extract a TMDB ID from either agent format:
+//   Modern:  Guid array entry  "tmdb://27205"
+//   Legacy:  guid string       "com.plexapp.agents.themoviedb://27205?lang=en"
+function extractTmdbId(item: PlexMetadataItem): number | null {
+  // 1. Modern agent — check Guid array first
+  if (item.Guid?.length) {
+    for (const g of item.Guid) {
+      const match = g.id.match(/^tmdb:\/\/(\d+)/);
+      if (match) return parseInt(match[1], 10);
+    }
+  }
+  // 2. Legacy agent — parse singular guid string
+  if (item.guid) {
+    const match = item.guid.match(/themoviedb:\/\/(\d+)/);
+    if (match) return parseInt(match[1], 10);
+  }
+  return null;
+}
+
+// Returns Map<tmdbId, libraryName> for all Plex items that can be matched by TMDB ID
 export async function buildPlexTmdbSet(
   serverUrl: string,
   token: string
@@ -114,14 +134,9 @@ export async function buildPlexTmdbSet(
   const tmdbMap = new Map<number, string>();
   for (const { section, items } of sectionResults) {
     for (const item of items) {
-      if (!item.Guid) continue;
-      for (const guid of item.Guid) {
-        if (guid.id.startsWith('tmdb://')) {
-          const tmdbId = parseInt(guid.id.replace('tmdb://', ''), 10);
-          if (!isNaN(tmdbId)) {
-            tmdbMap.set(tmdbId, section.title);
-          }
-        }
+      const tmdbId = extractTmdbId(item);
+      if (tmdbId !== null) {
+        tmdbMap.set(tmdbId, section.title);
       }
     }
   }
