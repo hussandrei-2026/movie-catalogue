@@ -1,7 +1,8 @@
-import type { CollectionItem, TMDBConfig } from './types';
+import type { CollectionItem, TMDBConfig, PlexConfig } from './types';
 
 const COLLECTION_KEY = 'movie_catalogue_v1';
 const TMDB_CONFIG_KEY = 'tmdb_config_v1';
+const PLEX_CONFIG_KEY = 'plex_config_v1';
 
 export function loadCollection(): CollectionItem[] {
   try {
@@ -57,4 +58,17 @@ export function loadTMDBConfig(): TMDBConfig | null {
 
 export function saveTMDBConfig(config: TMDBConfig): void {
   localStorage.setItem(TMDB_CONFIG_KEY, JSON.stringify(config));
+}
+
+export function loadPlexConfig(): PlexConfig | null {
+  try {
+    const raw = localStorage.getItem(PLEX_CONFIG_KEY);
+    return raw ? (JSON.parse(raw) as PlexConfig) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function savePlexConfig(config: PlexConfig): void {
+  localStorage.setItem(PLEX_CONFIG_KEY, JSON.stringify(config));
 }

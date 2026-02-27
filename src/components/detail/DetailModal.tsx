@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { X, Trash2, AlertTriangle } from 'lucide-react';
 import { useCollectionContext } from '../../context/CollectionContext';
-import { loadTMDBConfig } from '../../storage';
+import { loadTMDBConfig, loadPlexConfig } from '../../storage';
 import DetailHero from './DetailHero';
 import DetailPoster from './DetailPoster';
 import DetailInfo from './DetailInfo';
 import MetadataForm from './MetadataForm';
+import PlexStatus from './PlexStatus';
 import type { CollectionItem } from '../../types';
 
 interface DetailModalProps {
@@ -13,8 +14,9 @@ interface DetailModalProps {
   onClose: () => void;
 }
 
-// Load config once per app session, not per modal open
+// Load configs once per app session, not per modal open
 const config = loadTMDBConfig();
+const plexConfig = loadPlexConfig();
 
 export default function DetailModal({ item, onClose }: DetailModalProps) {
   const { updateItem, removeItem, getItem } = useCollectionContext();
@@ -104,6 +106,9 @@ export default function DetailModal({ item, onClose }: DetailModalProps) {
 
           <div className="px-4 pb-8 mt-4">
             <MetadataForm item={liveItem} onChange={handleChange} />
+            <div className="mt-4">
+              <PlexStatus item={liveItem} machineIdentifier={plexConfig?.machineIdentifier} />
+            </div>
           </div>
         </div>
       </div>

@@ -13,6 +13,7 @@ const messages: Record<CollectionFilter, string> = {
   watched: "You haven't marked anything as watched yet",
   unwatched: 'Nothing left to watch — nice!',
   wishlist: 'Your wishlist is empty',
+  inPlex: 'None of your collection items were found in Plex',
 };
 
 export default function EmptyState({ filter, onGoToSearch }: EmptyStateProps) {
