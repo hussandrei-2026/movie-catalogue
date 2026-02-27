@@ -18,12 +18,14 @@ export interface CollectionItem {
   // Plex integration
   plexAvailable?: boolean;
   plexLibraryName?: string | null;
+  plexRatingKey?: string; // Plex ratingKey for deep-linking into the Plex app
 }
 
 export interface PlexConfig {
   serverUrl: string;       // e.g. "http://192.168.1.100:32400"
   token: string;           // X-Plex-Token
   lastSyncAt: string | null;
+  machineIdentifier?: string; // Plex server machine ID, used to build deep links
 }
 
 export interface TMDBSearchResult {

@@ -25,6 +25,12 @@ interface PlexSectionsResponse {
   };
 }
 
+interface PlexIdentityResponse {
+  MediaContainer: {
+    machineIdentifier: string;
+  };
+}
+
 interface PlexLibraryResponse {
   MediaContainer: {
     Metadata?: PlexMetadataItem[];
@@ -75,6 +81,11 @@ export async function testConnection(serverUrl: string, token: string): Promise<
   await get<PlexSectionsResponse>(serverUrl, token, '/library/sections');
 }
 
+export async function fetchMachineIdentifier(serverUrl: string, token: string): Promise<string> {
+  const data = await get<PlexIdentityResponse>(serverUrl, token, '/identity');
+  return data.MediaContainer.machineIdentifier;
+}
+
 export async function fetchLibrarySections(
   serverUrl: string,
   token: string
@@ -117,11 +128,16 @@ function extractTmdbId(item: PlexMetadataItem): number | null {
   return null;
 }
 
-// Returns Map<tmdbId, libraryName> for all Plex items that can be matched by TMDB ID
+export interface PlexItemMatch {
+  libraryName: string;
+  ratingKey: string;
+}
+
+// Returns Map<tmdbId, PlexItemMatch> for all Plex items that can be matched by TMDB ID
 export async function buildPlexTmdbSet(
   serverUrl: string,
   token: string
-): Promise<Map<number, string>> {
+): Promise<Map<number, PlexItemMatch>> {
   const sections = await fetchLibrarySections(serverUrl, token);
 
   const sectionResults = await Promise.all(
@@ -131,12 +147,12 @@ export async function buildPlexTmdbSet(
     })
   );
 
-  const tmdbMap = new Map<number, string>();
+  const tmdbMap = new Map<number, PlexItemMatch>();
   for (const { section, items } of sectionResults) {
     for (const item of items) {
       const tmdbId = extractTmdbId(item);
       if (tmdbId !== null) {
-        tmdbMap.set(tmdbId, section.title);
+        tmdbMap.set(tmdbId, { libraryName: section.title, ratingKey: item.ratingKey });
       }
     }
   }

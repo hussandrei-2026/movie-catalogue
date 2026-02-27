@@ -29,6 +29,7 @@ export function usePlex(
       ...i,
       plexAvailable: undefined,
       plexLibraryName: null,
+      plexRatingKey: undefined,
     }));
     batchUpdateItems(cleared);
   }, [items, batchUpdateItems]);
@@ -42,16 +43,26 @@ export function usePlex(
     setSyncStatus('syncing');
     setSyncError(null);
     try {
-      const tmdbMap = await plexApi.buildPlexTmdbSet(config.serverUrl, config.token);
-      const updated = items.map(item => ({
-        ...item,
-        plexAvailable: tmdbMap.has(item.tmdbId),
-        plexLibraryName: tmdbMap.get(item.tmdbId) ?? null,
-      }));
+      const [tmdbMap, machineIdentifier] = await Promise.all([
+        plexApi.buildPlexTmdbSet(config.serverUrl, config.token),
+        config.machineIdentifier
+          ? Promise.resolve(config.machineIdentifier)
+          : plexApi.fetchMachineIdentifier(config.serverUrl, config.token),
+      ]);
+      const updated = items.map(item => {
+        const match = tmdbMap.get(item.tmdbId);
+        return {
+          ...item,
+          plexAvailable: match !== undefined,
+          plexLibraryName: match?.libraryName ?? null,
+          plexRatingKey: match?.ratingKey,
+        };
+      });
       batchUpdateItems(updated);
       const updatedConfig: PlexConfig = {
         ...config,
         lastSyncAt: new Date().toISOString(),
+        machineIdentifier,
       };
       storage.savePlexConfig(updatedConfig);
       setConfig(updatedConfig);
