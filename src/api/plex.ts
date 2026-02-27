@@ -93,7 +93,7 @@ export async function fetchSectionItems(
   const data = await get<PlexLibraryResponse>(
     serverUrl,
     token,
-    `/library/sections/${sectionKey}/all`
+    `/library/sections/${sectionKey}/all?includeGuids=1`
   );
   return data.MediaContainer.Metadata ?? [];
 }
