@@ -1,4 +1,4 @@
-import { Plus, Check } from 'lucide-react';
+import { Plus, Check, Loader2 } from 'lucide-react';
 import { buildImageUrl } from '../../api/tmdb';
 import ImageWithFallback from '../shared/ImageWithFallback';
 import Badge from '../shared/Badge';
@@ -10,7 +10,6 @@ interface SearchResultCardProps {
   alreadyAdded: boolean;
   adding: boolean;
   onAdd: () => void;
-  onViewDetail: () => void;
 }
 
 export default function SearchResultCard({
@@ -19,28 +18,26 @@ export default function SearchResultCard({
   alreadyAdded,
   adding,
   onAdd,
-  onViewDetail,
 }: SearchResultCardProps) {
   const baseUrl = config?.images.secure_base_url ?? 'https://image.tmdb.org/t/p';
   const posterUrl = buildImageUrl(result.poster_path, 'w342', baseUrl);
   const title = result.title ?? result.name ?? 'Unknown';
   const rawDate = result.release_date ?? result.first_air_date ?? '';
   const year = rawDate ? rawDate.slice(0, 4) : '';
-  const mediaType = result.media_type as 'movie' | 'tv';
+  const mediaType = result.media_type === 'movie' || result.media_type === 'tv'
+    ? result.media_type
+    : 'movie';
 
   return (
     <div className="flex flex-col rounded-xl overflow-hidden bg-gray-900 border border-gray-800">
-      {/* Poster — clickable for detail */}
-      <button
-        onClick={onViewDetail}
-        className="relative aspect-[2/3] w-full overflow-hidden cursor-pointer"
-      >
+      {/* Poster */}
+      <div className="relative aspect-[2/3] w-full overflow-hidden">
         <ImageWithFallback
           src={posterUrl}
           alt={title}
-          className="w-full h-full object-cover hover:scale-105 transition-transform"
+          className="w-full h-full object-cover"
         />
-      </button>
+      </div>
 
       {/* Info */}
       <div className="p-2 flex flex-col gap-1.5">
@@ -61,15 +58,11 @@ export default function SearchResultCard({
           }`}
         >
           {alreadyAdded ? (
-            <>
-              <Check size={12} />
-              Added
-            </>
+            <><Check size={12} />Added</>
+          ) : adding ? (
+            <><Loader2 size={12} className="animate-spin" />Adding...</>
           ) : (
-            <>
-              <Plus size={12} />
-              Add
-            </>
+            <><Plus size={12} />Add</>
           )}
         </button>
       </div>

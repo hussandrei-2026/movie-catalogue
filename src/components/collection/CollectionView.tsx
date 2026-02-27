@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useCollectionContext } from '../../context/CollectionContext';
 import FilterTabs from './FilterTabs';
 import MediaCard from './MediaCard';
@@ -16,7 +16,7 @@ function applyFilter(items: CollectionItem[], filter: CollectionFilter): Collect
     case 'movies': return items.filter(i => i.mediaType === 'movie');
     case 'tv': return items.filter(i => i.mediaType === 'tv');
     case 'watched': return items.filter(i => i.watched);
-    case 'unwatched': return items.filter(i => !i.watched && !i.wishlist);
+    case 'unwatched': return items.filter(i => !i.watched);
     case 'wishlist': return items.filter(i => i.wishlist);
   }
 }
@@ -24,7 +24,7 @@ function applyFilter(items: CollectionItem[], filter: CollectionFilter): Collect
 export default function CollectionView({ onItemClick, onGoToSearch }: CollectionViewProps) {
   const { items } = useCollectionContext();
   const [filter, setFilter] = useState<CollectionFilter>('all');
-  const filtered = applyFilter(items, filter);
+  const filtered = useMemo(() => applyFilter(items, filter), [items, filter]);
 
   return (
     <div className="flex flex-col">

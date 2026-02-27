@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import type { CollectionFilter, CollectionItem } from '../../types';
 
 const FILTERS: { key: CollectionFilter; label: string }[] = [
@@ -9,17 +10,6 @@ const FILTERS: { key: CollectionFilter; label: string }[] = [
   { key: 'wishlist', label: 'Wishlist' },
 ];
 
-function countFor(items: CollectionItem[], filter: CollectionFilter): number {
-  switch (filter) {
-    case 'all': return items.length;
-    case 'movies': return items.filter(i => i.mediaType === 'movie').length;
-    case 'tv': return items.filter(i => i.mediaType === 'tv').length;
-    case 'watched': return items.filter(i => i.watched).length;
-    case 'unwatched': return items.filter(i => !i.watched && !i.wishlist).length;
-    case 'wishlist': return items.filter(i => i.wishlist).length;
-  }
-}
-
 interface FilterTabsProps {
   active: CollectionFilter;
   items: CollectionItem[];
@@ -27,10 +17,18 @@ interface FilterTabsProps {
 }
 
 export default function FilterTabs({ active, items, onChange }: FilterTabsProps) {
+  const counts = useMemo(() => ({
+    all: items.length,
+    movies: items.filter(i => i.mediaType === 'movie').length,
+    tv: items.filter(i => i.mediaType === 'tv').length,
+    watched: items.filter(i => i.watched).length,
+    unwatched: items.filter(i => !i.watched).length,
+    wishlist: items.filter(i => i.wishlist).length,
+  }), [items]);
+
   return (
     <div className="flex gap-2 overflow-x-auto px-4 py-3 scrollbar-hide">
       {FILTERS.map(({ key, label }) => {
-        const count = countFor(items, key);
         const isActive = active === key;
         return (
           <button
@@ -48,7 +46,7 @@ export default function FilterTabs({ active, items, onChange }: FilterTabsProps)
                 isActive ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-400'
               }`}
             >
-              {count}
+              {counts[key]}
             </span>
           </button>
         );

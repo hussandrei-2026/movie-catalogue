@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useTMDB } from '../../hooks/useTMDB';
 import { useCollectionContext } from '../../context/CollectionContext';
 import { getMovieDetail, getTVDetail, getMovieImages, getTVImages, pickBestLogo } from '../../api/tmdb';
@@ -8,13 +8,24 @@ import ErrorMessage from '../shared/ErrorMessage';
 import type { TMDBSearchResult, CollectionItem } from '../../types';
 
 export default function SearchView() {
-  const { results, loading, error, config, search } = useTMDB();
+  const { results, loading, error, config, search, clearResults } = useTMDB();
   const { addItem, isInCollection } = useCollectionContext();
   const [addingId, setAddingId] = useState<number | null>(null);
+  const [addError, setAddError] = useState<string | null>(null);
+
+  const handleSearch = useCallback((query: string) => {
+    if (!query.trim()) clearResults();
+    else search(query);
+  }, [search, clearResults]);
 
   async function handleAdd(result: TMDBSearchResult) {
-    const mediaType = result.media_type as 'movie' | 'tv';
+    const mediaType = result.media_type === 'movie' || result.media_type === 'tv'
+      ? result.media_type
+      : null;
+    if (!mediaType) return;
+
     setAddingId(result.id);
+    setAddError(null);
     try {
       const [detail, images] = await Promise.all([
         mediaType === 'movie' ? getMovieDetail(result.id) : getTVDetail(result.id),
@@ -40,24 +51,23 @@ export default function SearchView() {
       };
       addItem(item);
     } catch (err) {
-      console.error('Failed to add item:', err);
+      setAddError(err instanceof Error ? err.message : 'Failed to add item — please try again');
     } finally {
       setAddingId(null);
     }
   }
 
-  function handleViewDetail(result: TMDBSearchResult) {
-    // Future: open detail for search results before adding
-    void result;
-    alert('Tip: Add the item first, then click it in your collection to view full details.');
-  }
-
   return (
     <div className="flex flex-col">
-      <SearchBar onSearch={search} loading={loading} />
+      <SearchBar onSearch={handleSearch} loading={loading} />
       {error && (
         <div className="px-4 mb-3">
           <ErrorMessage message={error} />
+        </div>
+      )}
+      {addError && (
+        <div className="px-4 mb-3">
+          <ErrorMessage message={addError} />
         </div>
       )}
       <SearchResults
@@ -65,7 +75,6 @@ export default function SearchView() {
         config={config}
         addingId={addingId}
         onAdd={handleAdd}
-        onViewDetail={handleViewDetail}
         isInCollection={isInCollection}
       />
       {!loading && results.length === 0 && !error && (

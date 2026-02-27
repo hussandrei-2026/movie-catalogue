@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { Film } from 'lucide-react';
 
 interface ImageWithFallbackProps {
@@ -7,14 +7,16 @@ interface ImageWithFallbackProps {
   className?: string;
 }
 
-export default function ImageWithFallback({ src, alt, className = '' }: ImageWithFallbackProps) {
+const ImageWithFallback = memo(function ImageWithFallback({
+  src,
+  alt,
+  className = '',
+}: ImageWithFallbackProps) {
   const [failed, setFailed] = useState(false);
 
   if (!src || failed) {
     return (
-      <div
-        className={`flex items-center justify-center bg-gray-800 text-gray-600 ${className}`}
-      >
+      <div className={`flex items-center justify-center bg-gray-800 text-gray-600 ${className}`}>
         <Film size={32} />
       </div>
     );
@@ -29,4 +31,6 @@ export default function ImageWithFallback({ src, alt, className = '' }: ImageWit
       onError={() => setFailed(true)}
     />
   );
-}
+});
+
+export default ImageWithFallback;

@@ -3,6 +3,11 @@ import type { TMDBConfig, TMDBDetail, TMDBImages, TMDBSearchResult } from '../ty
 const BASE = 'https://api.themoviedb.org/3';
 const KEY = import.meta.env.VITE_TMDB_API_KEY as string;
 const IMG_BASE = 'https://image.tmdb.org/t/p';
+const TIMEOUT_MS = 10000;
+
+if (!KEY) {
+  throw new Error('VITE_TMDB_API_KEY is not set — add it to your .env file');
+}
 
 async function get<T>(path: string, params: Record<string, string> = {}): Promise<T> {
   const url = new URL(`${BASE}${path}`);
@@ -10,9 +15,20 @@ async function get<T>(path: string, params: Record<string, string> = {}): Promis
   for (const [k, v] of Object.entries(params)) {
     url.searchParams.set(k, v);
   }
-  const res = await fetch(url.toString());
-  if (!res.ok) throw new Error(`TMDB ${res.status}: ${res.statusText}`);
-  return res.json() as Promise<T>;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    const res = await fetch(url.toString(), { signal: controller.signal });
+    if (!res.ok) throw new Error(`TMDB ${res.status}: ${res.statusText}`);
+    return res.json() as Promise<T>;
+  } catch (err) {
+    if ((err as Error).name === 'AbortError') {
+      throw new Error('Request timed out — check your connection and try again');
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 export async function searchMulti(query: string): Promise<TMDBSearchResult[]> {

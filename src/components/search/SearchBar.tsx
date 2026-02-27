@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, Barcode, X } from 'lucide-react';
 
+const DEBOUNCE_MS = 400;
+
 interface SearchBarProps {
   onSearch: (query: string) => void;
   loading: boolean;
@@ -14,7 +16,7 @@ export default function SearchBar({ onSearch, loading }: SearchBarProps) {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       onSearch(query);
-    }, 400);
+    }, DEBOUNCE_MS);
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
