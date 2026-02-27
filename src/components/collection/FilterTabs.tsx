@@ -8,6 +8,7 @@ const FILTERS: { key: CollectionFilter; label: string }[] = [
   { key: 'watched', label: 'Watched' },
   { key: 'unwatched', label: 'Unwatched' },
   { key: 'wishlist', label: 'Wishlist' },
+  { key: 'inPlex', label: 'In Plex' },
 ];
 
 interface FilterTabsProps {
@@ -24,6 +25,7 @@ export default function FilterTabs({ active, items, onChange }: FilterTabsProps)
     watched: items.filter(i => i.watched).length,
     unwatched: items.filter(i => !i.watched).length,
     wishlist: items.filter(i => i.wishlist).length,
+    inPlex: items.filter(i => i.plexAvailable === true).length,
   }), [items]);
 
   return (

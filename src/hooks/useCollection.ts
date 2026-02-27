@@ -32,5 +32,10 @@ export function useCollection() {
     [items]
   );
 
-  return { items, addItem, updateItem, removeItem, isInCollection, getItem };
+  const batchUpdateItems = useCallback((newItems: CollectionItem[]) => {
+    storage.saveCollection(newItems);
+    setItems(newItems);
+  }, []);
+
+  return { items, addItem, updateItem, removeItem, isInCollection, getItem, batchUpdateItems };
 }

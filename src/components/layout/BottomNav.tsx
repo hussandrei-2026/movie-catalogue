@@ -1,4 +1,4 @@
-import { Library, Search } from 'lucide-react';
+import { Library, Search, Settings } from 'lucide-react';
 import type { AppView } from '../../types';
 
 interface BottomNavProps {
@@ -26,6 +26,15 @@ export default function BottomNav({ view, onViewChange }: BottomNavProps) {
       >
         <Search size={22} />
         <span>Search</span>
+      </button>
+      <button
+        onClick={() => onViewChange('settings')}
+        className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors cursor-pointer ${
+          view === 'settings' ? 'text-blue-500' : 'text-gray-500 hover:text-gray-300'
+        }`}
+      >
+        <Settings size={22} />
+        <span>Settings</span>
       </button>
     </nav>
   );

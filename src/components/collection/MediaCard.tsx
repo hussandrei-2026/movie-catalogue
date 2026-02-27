@@ -1,4 +1,4 @@
-import { Eye, Heart, Star } from 'lucide-react';
+import { Eye, Heart, Star, Server } from 'lucide-react';
 import { buildImageUrl } from '../../api/tmdb';
 import ImageWithFallback from '../shared/ImageWithFallback';
 import type { CollectionItem } from '../../types';
@@ -34,6 +34,15 @@ export default function MediaCard({ item, onClick }: MediaCardProps) {
           {item.wishlist && (
             <span className="flex items-center gap-1 bg-pink-900/90 text-pink-300 text-xs px-1.5 py-0.5 rounded-full">
               <Heart size={10} />
+            </span>
+          )}
+          {item.plexAvailable && (
+            <span
+              className="flex items-center rounded-full px-1.5 py-0.5"
+              style={{ backgroundColor: 'rgba(229,160,13,0.25)', color: '#E5A00D' }}
+              title="Available in Plex"
+            >
+              <Server size={10} />
             </span>
           )}
         </div>

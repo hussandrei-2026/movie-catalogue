@@ -13,6 +13,7 @@ interface CollectionContextValue {
   removeItem: (tmdbId: number, mediaType: 'movie' | 'tv') => void;
   isInCollection: (tmdbId: number, mediaType: 'movie' | 'tv') => boolean;
   getItem: (tmdbId: number, mediaType: 'movie' | 'tv') => CollectionItem | null;
+  batchUpdateItems: (items: CollectionItem[]) => void;
 }
 
 const CollectionContext = createContext<CollectionContextValue | null>(null);
